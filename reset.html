@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Reset</title>
+<style>
+:root {
+  --bg: #F7F3EE;
+  --card: #FFFFFF;
+  --text: #3C3633;
+  --text-light: #948376;
+  --text-dim: #C4B8AB;
+  --accent: #C4A88A;
+  --accent-hover: #B89A7A;
+  --accent-light: #F0E8DE;
+  --tag-bg: #EBE3D8;
+  --tag-text: #5C4F42;
+  --danger: #C97C7C;
+  --danger-hover: #B86A6A;
+  --border: #E8E0D6;
+  --shadow: 0 2px 16px rgba(60, 54, 51, 0.06);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --splash-bg: #C4A88A;
+}
+
+/* ===== Themes ===== */
+body.theme-ocean {
+  --bg: #EFF4F8;
+  --card: #FFFFFF;
+  --text: #2D3A4A;
+  --text-light: #6A8096;
+  --text-dim: #A0B4C8;
+  --accent: #6A9AB5;
+  --accent-hover: #5A8AA5;
+  --accent-light: #E0EBF4;
+  --tag-bg: #D4E2EE;
+  --tag-text: #3A5A72;
+  --danger: #C97C7C;
+  --border: #D0DDE8;
+  --shadow: 0 2px 16px rgba(42, 58, 74, 0.06);
+  --splash-bg: #6A9AB5;
+}
+body.theme-mint {
+  --bg: #F0F5EE;
+  --card: #FFFFFF;
+  --text: #3A4238;
+  --text-light: #7A8E76;
+  --text-dim: #A8BAA4;
+  --accent: #7FAF7A;
+  --accent-hover: #6E9F68;
+  --accent-light: #E2F0DE;
+  --tag-bg: #D4E8CE;
+  --tag-text: #3A5A38;
+  --danger: #C97C7C;
+  --border: #CEE0C8;
+  --shadow: 0 2px 16px rgba(58, 66, 56, 0.06);
+  --splash-bg: #7FAF7A;
+}
+body.theme-blush {
+  --bg: #F8F0F2;
+  --card: #FFFFFF;
+  --text: #4A3A42;
+  --text-light: #8E7682;
+  --text-dim: #BEAEB8;
+  --accent: #D4A0B0;
+  --accent-hover: #C48FA0;
+  --accent-light: #F0E2E8;
+  --tag-bg: #E8D6DE;
+  --tag-text: #5A4A52;
+  --danger: #C97C7C;
+  --border: #E0CED6;
+  --shadow: 0 2px 16px rgba(74, 58, 66, 0.06);
+  --splash-bg: #D4A0B0;
+}
+body.theme-apricot {
+  --bg: #F8F2EA;
+  --card: #FFFFFF;
+  --text: #3C3833;
+  --text-light: #8E8476;
+  --text-dim: #BEB4A8;
+  --accent: #D4B896;
+  --accent-hover: #C4A884;
+  --accent-light: #F0E8DE;
+  --tag-bg: #E8E0D4;
+  --tag-text: #5C5448;
+  --danger: #C97C7C;
+  --border: #E0D8CC;
+  --shadow: 0 2px 16px rgba(60, 56, 51, 0.06);
+  --splash-bg: #D4B896;
+}
+body.theme-lavender {
+  --bg: #F2EFF6;
+  --card: #FFFFFF;
+  --text: #3A364A;
+  --text-light: #7A7294;
+  --text-dim: #ACA4C4;
+  --accent: #9A8ABF;
+  --accent-hover: #8A7AAF;
+  --accent-light: #E6E0F2;
+  --tag-bg: #D8D2E8;
+  --tag-text: #4A4260;
+  --danger: #C97C7C;
+  --border: #D6CEDE;
+  --shadow: 0 2px 16px rgba(58, 54, 74, 0.06);
+  --splash-bg: #9A8ABF;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* ===== Splash ===== */
+#splash {
+  position: fixed; z-index: 100;
+  inset: 0;
+  background: var(--splash-bg, var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+#splash.hide {
+  opacity: 0;
+  visibility: hidden;
+}
+#splash-text {
+  font-size: clamp(24px, 6vw, 36px);
+  color: #fff;
+  font-weight: 400;
+  letter-spacing: 2px;
+  line-height: 1.8;
+  text-align: center;
+  padding: 0 24px;
+  animation: fadeUp 1s ease forwards;
+}
+#splash-brand {
+  position: absolute;
+  bottom: 48px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 4px;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== App Shell ===== */
+#app {
+  display: flex; flex-direction: column;
+  height: 100vh; height: 100dvh;
+  opacity: 0;
+  transition: opacity 0.6s ease 0.2s;
+}
+#app.visible { opacity: 1; }
+
+/* Header */
+.header {
+  flex-shrink: 0;
+  padding: 16px 20px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.header-title {
+  font-size: 22px; font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+.header-title span { font-weight: 300; font-size: 14px; color: var(--text-light); margin-left: 6px; }
+.header-btn {
+  background: none; border: none;
+  font-size: 20px; color: var(--text-light);
+  cursor: pointer; padding: 4px 6px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.header-btn:active { background: var(--accent-light); }
+
+/* Content */
+.content {
+  flex: 1; overflow-y: auto;
+  padding: 0 20px 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tab Bar */
+.tab-bar {
+  flex-shrink: 0;
+  display: flex;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+  padding: 6px 0 env(safe-area-inset-bottom, 8px);
+}
+.tab-item {
+  flex: 1; text-align: center;
+  padding: 8px 0 4px;
+  font-size: 12px; color: var(--text-dim);
+  background: none; border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.tab-item .tab-icon { font-size: 20px; line-height: 1.2; }
+.tab-item.active { color: var(--accent); }
+
+/* ===== Tab: 记录 ===== */
+.record-date {
+  font-size: 15px; color: var(--text-light);
+  margin-bottom: 16px;
+  font-weight: 400;
+}
+.record-textarea {
+  width: 100%; min-height: 180px;
+  padding: 18px 20px;
+  font-size: 16px; line-height: 1.7;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  resize: vertical;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.record-textarea:focus { border-color: var(--accent); }
+.record-textarea::placeholder { color: var(--text-dim); }
+
+/* Tags section */
+.tags-section {
+  margin-top: 16px;
+}
+.tags-label {
+  font-size: 13px; color: var(--text-light);
+  margin-bottom: 8px;
+}
+.tags-grid {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.tag-chip {
+  display: inline-flex; align-items: center;
+  padding: 6px 14px;
+  font-size: 14px; color: var(--tag-text);
+  background: var(--tag-bg);
+  border-radius: 20px;
+  cursor: pointer; border: none;
+  transition: all 0.2s;
+}
+.tag-chip:active { transform: scale(0.95); }
+.tag-chip.selected {
+  background: var(--accent);
+  color: #fff;
+}
+.tag-chip .tag-del {
+  margin-left: 6px;
+  font-size: 12px;
+  opacity: 0.5;
+  background: none; border: none;
+  cursor: pointer; color: inherit; padding: 0;
+  line-height: 1;
+}
+.tag-chip .tag-del:hover { opacity: 1; }
+.tag-chip.add-btn {
+  background: transparent;
+  border: 1px dashed var(--border);
+  color: var(--text-light);
+  font-size: 18px; padding: 6px 12px;
+}
+.tag-input-wrapper {
+  display: none;
+  margin-top: 8px;
+}
+.tag-input-wrapper.show { display: flex; gap: 8px; }
+.tag-input {
+  flex: 1;
+  padding: 8px 14px;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none; font-family: inherit;
+  background: var(--card);
+}
+.tag-input:focus { border-color: var(--accent); }
+.tag-confirm {
+  padding: 8px 16px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  cursor: pointer; font-size: 14px;
+}
+
+/* Save Button */
+.save-btn {
+  width: 100%; margin-top: 20px; margin-bottom: 8px;
+  padding: 14px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius);
+  font-size: 16px; font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  letter-spacing: 2px;
+}
+.save-btn:active { opacity: 0.7; }
+.save-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* Toast */
+.toast {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
+  background: rgba(60, 54, 51, 0.85);
+  color: #fff; padding: 16px 28px;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  z-index: 50;
+  opacity: 0; visibility: hidden;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  text-align: center;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
+
+/* ===== Tab: 历程 ===== */
+.history-empty {
+  text-align: center; color: var(--text-dim);
+  padding: 60px 20px; line-height: 1.8;
+  font-size: 15px;
+}
+.history-filter {
+  display: flex; gap: 6px; overflow-x: auto;
+  padding-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.history-filter::-webkit-scrollbar { display: none; }
+.filter-chip {
+  flex-shrink: 0;
+  padding: 5px 14px; font-size: 13px;
+  border-radius: 16px; border: none;
+  background: var(--tag-bg); color: var(--tag-text);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-chip.active { background: var(--accent); color: #fff; }
+.filter-chip.all { background: transparent; border: 1px solid var(--border); }
+.filter-chip.all.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.history-list { padding-bottom: 12px; }
+.history-day {
+  font-size: 13px; color: var(--text-dim);
+  margin: 20px 0 8px 4px;
+  font-weight: 500;
+}
+.history-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.history-item:active { transform: scale(0.99); }
+.history-item .item-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 12px;
+}
+.history-item .item-time { font-size: 12px; color: var(--text-dim); flex-shrink: 0; margin-top: 2px; }
+.history-item .item-content {
+  flex: 1;
+  font-size: 15px; line-height: 1.6;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+.history-item .item-content.expanded {
+  display: block; -webkit-line-clamp: unset;
+}
+.history-item .item-tags {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px;
+}
+.history-item .item-tag {
+  font-size: 11px; padding: 2px 10px;
+  border-radius: 12px;
+  background: var(--tag-bg); color: var(--tag-text);
+}
+.history-item .item-bottom {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 8px; gap: 8px;
+}
+.history-item .item-actions {
+  display: flex; align-items: center; gap: 2px; flex-shrink: 0;
+}
+.history-item .item-action-btn {
+  background: none; border: none; cursor: pointer;
+  padding: 8px 14px; border-radius: 8px;
+  font-size: 14px; color: var(--text-dim);
+  transition: background 0.2s; line-height: 1;
+}
+.history-item .item-action-btn:active { background: var(--accent-light); color: var(--text); }
+.history-item .item-action-btn.danger:active { background: #F5E6E6; color: var(--danger); }
+.history-item .item-dumped-tag {
+  font-size: 11px; color: var(--text-dim);
+  padding: 2px 8px; background: var(--tag-bg);
+  border-radius: 4px; white-space: nowrap;
+}
+
+/* ===== Tab: 倾倒 ===== */
+.dump-header { text-align: center; padding: 24px 0 16px; }
+.dump-days {
+  font-size: 13px; color: var(--text-light);
+  margin-bottom: 4px;
+}
+.dump-days strong { font-size: 28px; color: var(--accent); font-weight: 500; }
+.dump-progress {
+  display: flex; justify-content: center; gap: 5px;
+  margin: 10px 0;
+}
+.dump-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--tag-bg);
+  transition: background 0.3s;
+}
+.dump-dot.filled { background: var(--accent); }
+
+.dump-section-label {
+  font-size: 13px; color: var(--text-light);
+  margin: 20px 0 8px;
+}
+.dump-record-item .dr-date { font-size: 12px; color: var(--text-dim); }
+.dump-textarea {
+  width: 100%; min-height: 120px;
+  padding: 16px 18px;
+  font-size: 15px; line-height: 1.7;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  resize: vertical;
+  font-family: inherit;
+  outline: none;
+}
+.dump-textarea:focus { border-color: var(--accent); }
+.dump-textarea::placeholder { color: var(--text-dim); }
+
+.dump-btn {
+  width: 100%; margin-top: 16px; padding: 14px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius);
+  font-size: 16px; font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  letter-spacing: 2px;
+}
+.dump-btn:active { opacity: 0.7; }
+.dump-btn:disabled { opacity: 0.3; cursor: default; }
+
+.dump-empty {
+  text-align: center; color: var(--text-dim);
+  padding: 40px 20px; line-height: 1.8;
+  font-size: 14px;
+}
+.dump-done {
+  text-align: center; padding: 40px 20px;
+}
+.dump-done .done-icon {
+  font-size: 48px; margin-bottom: 12px;
+  opacity: 0.6;
+}
+.dump-done .done-text { font-size: 16px; color: var(--text-light); line-height: 1.6; }
+.dump-done .done-date { font-size: 13px; color: var(--text-dim); margin-top: 8px; }
+
+/* ===== Settings Overlay ===== */
+.overlay {
+  position: fixed; z-index: 60;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  opacity: 0; visibility: hidden;
+  transition: all 0.3s ease;
+}
+.overlay.show { opacity: 1; visibility: visible; }
+
+.settings-panel {
+  position: fixed; z-index: 61;
+  bottom: 0; left: 0; right: 0;
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  padding: 20px 24px calc(env(safe-area-inset-bottom, 16px) + 16px);
+  max-height: 75vh; overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.35s ease;
+}
+.overlay.show + .settings-panel,
+.settings-panel.show { transform: translateY(0); }
+
+.settings-handle {
+  width: 36px; height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  margin: 0 auto 16px;
+}
+.settings-title {
+  font-size: 17px; font-weight: 600; margin-bottom: 16px;
+}
+.settings-section { margin-bottom: 20px; }
+.settings-section-title {
+  font-size: 13px; color: var(--text-light);
+  margin-bottom: 8px; font-weight: 500;
+}
+.settings-quote-item {
+  display: flex; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+.settings-quote-item .q-text { flex: 1; font-size: 14px; line-height: 1.5; }
+.settings-quote-item .q-del {
+  background: none; border: none;
+  color: var(--text-dim); font-size: 16px;
+  cursor: pointer; padding: 4px;
+}
+.settings-quote-item .q-del:active { color: var(--danger); }
+
+.settings-add-row {
+  display: flex; gap: 8px; margin-top: 8px;
+}
+.settings-add-input {
+  flex: 1;
+  padding: 10px 14px; font-size: 14px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  outline: none; font-family: inherit;
+  background: var(--bg);
+}
+.settings-add-input:focus { border-color: var(--accent); }
+.settings-add-btn {
+  padding: 10px 18px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  cursor: pointer; font-size: 14px;
+  white-space: nowrap;
+}
+
+.settings-tag-item {
+  display: inline-flex; align-items: center;
+  padding: 6px 12px; margin: 3px;
+  background: var(--tag-bg);
+  border-radius: 16px;
+  font-size: 14px; gap: 6px;
+}
+.settings-tag-item .st-del {
+  background: none; border: none;
+  cursor: pointer; color: var(--text-dim); font-size: 12px;
+  padding: 0;
+}
+.settings-tag-item .st-del:active { color: var(--danger); }
+.settings-tags-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
+
+/* ===== Scrollbar ===== */
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-track { background: transparent; }
+.content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ===== Tab content visibility ===== */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ===== Record empty state ===== */
+.record-count-badge {
+  font-size: 12px; color: var(--text-dim);
+  margin-top: 12px; text-align: center;
+}
+
+/* ===== Edit Overlay ===== */
+.edit-overlay {
+  position: fixed; z-index: 80;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  opacity: 0; visibility: hidden;
+  transition: all 0.3s ease;
+}
+.edit-overlay.show { opacity: 1; visibility: visible; }
+
+.edit-panel {
+  position: fixed; z-index: 81;
+  bottom: 0; left: 0; right: 0;
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  padding: 20px 24px calc(env(safe-area-inset-bottom, 16px) + 16px);
+  max-height: 80vh; overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.35s ease;
+}
+.edit-overlay.show ~ .edit-panel,
+.edit-panel.show { transform: translateY(0); }
+
+.edit-handle {
+  width: 36px; height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  margin: 0 auto 16px;
+}
+.edit-title { font-size: 17px; font-weight: 600; margin-bottom: 16px; }
+.edit-textarea {
+  width: 100%; min-height: 160px;
+  padding: 16px 18px;
+  font-size: 16px; line-height: 1.7;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  resize: vertical;
+  font-family: inherit;
+  outline: none;
+}
+.edit-textarea:focus { border-color: var(--accent); }
+.edit-tags { margin: 14px 0; }
+.edit-tags-label { font-size: 13px; color: var(--text-light); margin-bottom: 8px; }
+.edit-tags-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.edit-actions { display: flex; gap: 10px; }
+.edit-cancel-btn {
+  flex: 1; padding: 12px;
+  background: var(--tag-bg); color: var(--text);
+  border: none; border-radius: var(--radius);
+  font-size: 15px; cursor: pointer;
+}
+.edit-save-btn {
+  flex: 2; padding: 12px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius);
+  font-size: 15px; font-weight: 500; cursor: pointer;
+  letter-spacing: 1px;
+}
+
+/* ===== Dump checkbox ===== */
+.dump-record-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  font-size: 14px; line-height: 1.5;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.dump-record-item:active { transform: scale(0.99); }
+.dump-record-item.selected {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+.dump-record-item .dr-check {
+  width: 20px; height: 20px; flex-shrink: 0;
+  border: 2px solid var(--text-dim);
+  border-radius: 50%;
+  margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: transparent;
+  transition: all 0.2s;
+}
+.dump-record-item.selected .dr-check {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.dump-record-item .dr-body { flex: 1; min-width: 0; }
+.dump-record-item .dr-date { font-size: 12px; color: var(--text-dim); }
+
+/* ===== Settings Collapse ===== */
+.settings-collapse-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; cursor: pointer;
+  font-size: 14px; font-weight: 500; color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.settings-collapse-header:active { opacity: 0.6; }
+.settings-collapse-arrow {
+  font-size: 10px; color: var(--text-dim);
+  transition: transform 0.25s ease;
+}
+.settings-collapse-body {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease;
+}
+.settings-collapse-body.open { max-height: 2000px; }
+
+/* ===== Dump History ===== */
+.dump-history { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+.dump-history-item {
+  padding: 10px 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+}
+.dump-history-item .dh-date { font-size: 12px; color: var(--text-dim); }
+.dump-history-item .dh-content { font-size: 14px; color: var(--text); margin-top: 4px; line-height: 1.5; white-space: pre-wrap; }
+.dump-history-item .dh-count { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.dh-section-label { font-size: 12px; font-weight: 600; color: var(--text-light); margin: 8px 0 4px; }
+.dh-record { font-size: 13px; color: var(--text-light); padding: 2px 0 2px 12px; border-left: 2px solid var(--border); margin-bottom: 2px; }
+.dh-followup { font-size: 13px; color: var(--text); padding: 4px 0 4px 12px; border-left: 2px solid var(--accent); margin-bottom: 2px; }
+.dh-followup .dh-fu-time { font-size: 11px; color: var(--text-dim); }
+.dh-section { margin-bottom: 10px; }
+.dh-section:last-child { margin-bottom: 0; }
+
+/* ===== Dump done / followup ===== */
+.dump-done { text-align: center; padding: 40px 20px; }
+.dump-done .done-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.6; }
+.dump-done .done-text { font-size: 16px; color: var(--text-light); line-height: 1.6; }
+.dump-done .done-date { font-size: 13px; color: var(--text-dim); margin-top: 8px; }
+/* ===== History followup ===== */
+.history-fu-btn {
+  font-size: 12px; color: var(--accent); cursor: pointer; background: none; border: none;
+  padding: 2px 8px; border-radius: 12px; transition: all 0.2s; white-space: nowrap;
+}
+.history-fu-btn:hover { background: var(--accent-light); }
+.history-fu-panel {
+  margin-top: 8px; padding: 10px 12px; background: var(--accent-light);
+  border-radius: var(--radius-sm); display: none;
+}
+.history-fu-panel.show { display: block; }
+.history-fu-panel textarea {
+  width: 100%; min-height: 60px; padding: 10px 12px; font-size: 14px; line-height: 1.6;
+  border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit;
+  resize: vertical; outline: none; background: var(--card);
+}
+.history-fu-panel textarea:focus { border-color: var(--accent); }
+.history-fu-panel .fu-actions { display: flex; gap: 8px; margin-top: 6px; }
+.history-fu-panel .fu-submit {
+  flex: 1; padding: 8px; background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;
+}
+.history-fu-panel .fu-cancel {
+  padding: 8px 14px; background: var(--tag-bg); color: var(--text);
+  border: none; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;
+}
+.tag-followup { background: var(--accent-light); color: var(--accent-hover); font-size: 11px; }
+</style>
+</head>
+<body>
+
+<!-- Splash -->
+<div id="splash">
+  <div id="splash-text"></div>
+  <div id="splash-brand">R E S E T</div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- App -->
+<div id="app">
+  <div class="header">
+    <div class="header-title">Reset</div>
+    <button class="header-btn" id="settingsBtn" aria-label="设置">⚙</button>
+  </div>
+
+  <div class="content" id="contentArea">
+    <!-- 记录 -->
+    <div class="tab-content active" id="tabRecord">
+      <div class="record-date" id="recordDate"></div>
+      <textarea class="record-textarea" id="recordInput" placeholder="那一刻…" rows="6"></textarea>
+      <div class="tags-section">
+        <div class="tags-label">标签（选填）</div>
+        <div class="tags-grid" id="tagsGrid"></div>
+        <div class="tag-input-wrapper" id="tagInputWrapper">
+          <input class="tag-input" id="tagInput" placeholder="输入标签名" maxlength="10">
+          <button class="tag-confirm" id="tagConfirm">添加</button>
+        </div>
+      </div>
+      <button class="save-btn" id="saveBtn">记录</button>
+      <div class="record-count-badge" id="recordCount"></div>
+    </div>
+
+    <!-- 历程 -->
+    <div class="tab-content" id="tabHistory">
+      <div class="history-empty" id="historyEmpty">
+        还没有记录<br>每一次面对，都值得被看见
+      </div>
+      <div class="history-filter" id="historyFilter"></div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+
+    <!-- 倾倒 -->
+    <div class="tab-content" id="tabDump">
+      <div id="dumpView"></div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-item active" data-tab="record">
+      <span class="tab-icon">✎</span>
+      <span>记录</span>
+    </button>
+    <button class="tab-item" data-tab="history">
+      <span class="tab-icon">☰</span>
+      <span>历程</span>
+    </button>
+    <button class="tab-item" data-tab="dump" id="dumpTabBtn">
+      <span class="tab-icon">○</span>
+      <span>倾倒</span>
+    </button>
+  </div>
+</div>
+
+<!-- Overlay + Settings -->
+<div class="overlay" id="overlay"></div>
+<div class="settings-panel" id="settingsPanel">
+  <div class="settings-handle"></div>
+  <div class="settings-title">设置</div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">主题</div>
+    <div id="themeSelector" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-collapse-header" id="quoteCollapseHeader">
+      <span>开屏句子（<span id="quoteCount">0</span>条）</span>
+      <span class="settings-collapse-arrow" id="quoteArrow">▾</span>
+    </div>
+    <div class="settings-collapse-body" id="quoteCollapseBody">
+      <div id="quoteList" style="padding:4px 0"></div>
+      <div class="settings-add-row">
+        <input class="settings-add-input" id="quoteInput" placeholder="添加新句子" maxlength="50">
+        <button class="settings-add-btn" id="quoteAddBtn">添加</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">自定义标签</div>
+    <div class="settings-tags-wrap" id="settingsTagsWrap"></div>
+    <div class="settings-add-row" style="margin-top:8px">
+      <input class="settings-add-input" id="settingsTagInput" placeholder="添加新标签" maxlength="10">
+      <button class="settings-add-btn" id="settingsTagAddBtn">添加</button>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">数据管理</div>
+    <div style="display:flex;gap:10px;margin-bottom:10px;">
+      <button class="settings-add-btn" id="exportBtn" style="flex:1;">导出数据</button>
+      <button class="settings-add-btn" id="importBtn" style="flex:1;">导入数据</button>
+    </div>
+    <input type="file" id="importFileInput" accept=".json" style="display:none">
+    <button class="save-btn" id="clearDataBtn" style="background:var(--danger);margin:0;">清空所有数据</button>
+  </div>
+</div>
+
+<!-- Edit Overlay -->
+<div class="edit-overlay" id="editOverlay"></div>
+<div class="edit-panel" id="editPanel">
+  <div class="edit-handle"></div>
+  <div class="edit-title">编辑记录</div>
+  <textarea class="edit-textarea" id="editTextarea" rows="6"></textarea>
+  <div class="edit-tags">
+    <div class="edit-tags-label">标签</div>
+    <div class="edit-tags-grid" id="editTagsGrid"></div>
+  </div>
+  <div class="edit-actions">
+    <button class="edit-cancel-btn" id="editCancelBtn">取消</button>
+    <button class="edit-save-btn" id="editSaveBtn">保存修改</button>
+  </div>
+</div>
+
+<script>
+// ===== Default Data =====
+const DEFAULT_TAGS = ['愤怒', '焦虑', '悲伤', '释然', '烦躁', '平静', '无力', '委屈', '开心', '害怕', '温暖', '感动'];
+const DEFAULT_QUOTES = [
+  '缓一缓，再继续',
+  '每一次清空，都是一次重启',
+  '你来了',
+  '停下来，给自己一刻',
+  '可以不用一直坚强',
+  '今天也不过如此',
+  '呼吸',
+  '你会没事的',
+  '辛苦了，你已经做得很好了',
+];
+
+// ===== Store =====
+function loadData() {
+  try {
+    const raw = localStorage.getItem('reset_data');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return null;
+}
+
+function saveData() {
+  const data = {
+    records: store.records,
+    tags: store.tags,
+    quotes: store.quotes,
+    dumps: store.dumps,
+    theme: store.theme,
+  };
+  localStorage.setItem('reset_data', JSON.stringify(data));
+}
+
+const store = (() => {
+  const saved = loadData();
+  return {
+    records: saved?.records ?? [],
+    tags: saved?.tags ?? [...DEFAULT_TAGS],
+    quotes: saved?.quotes ?? [...DEFAULT_QUOTES],
+    dumps: saved?.dumps ?? [],
+    theme: saved?.theme ?? 'default',
+  };
+})();
+
+const THEMES = [
+  { id: 'default', label: '原木', color: '#C4A88A' },
+  { id: 'ocean', label: '静谧蓝', color: '#6A9AB5' },
+  { id: 'mint', label: '抹茶绿', color: '#7FAF7A' },
+  { id: 'blush', label: '玫瑰粉', color: '#D4A0B0' },
+  { id: 'apricot', label: '暖杏', color: '#D4B896' },
+  { id: 'lavender', label: '淡紫', color: '#9A8ABF' },
+];
+
+const _save = saveData;
+
+// ===== Helpers =====
+function todayStr() {
+  const d = new Date();
+  const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const weekdays = ['日','一','二','三','四','五','六'];
+  return `${ds} · 周${weekdays[d.getDay()]}`;
+}
+function nowStr() {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function timeSince(dateStr) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diff = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+  if (diff === 0) return '今天';
+  if (diff === 1) return '昨天';
+  return `${diff} 天前`;
+}
+
+function groupByDay(records) {
+  const groups = {};
+  records.forEach(r => {
+    const day = r.date.slice(0, 10);
+    if (!groups[day]) groups[day] = [];
+    groups[day].push(r);
+  });
+  return Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]));
+}
+
+// ===== Toast =====
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 1600);
+}
+
+// ===== Theme =====
+function applyTheme(id) {
+  document.body.className = '';
+  if (id && id !== 'default') {
+    document.body.classList.add('theme-' + id);
+  }
+  store.theme = id;
+  _save();
+}
+
+function renderThemeSelector() {
+  const el = document.getElementById('themeSelector');
+  el.innerHTML = '';
+  THEMES.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = `tag-chip ${store.theme === t.id ? 'selected' : ''}`;
+    btn.style.cssText = `display:flex;align-items:center;gap:6px;padding:6px 12px;font-size:13px;`;
+    const dot = document.createElement('span');
+    dot.style.cssText = `width:12px;height:12px;border-radius:50%;background:${t.color};flex-shrink:0;border:1px solid rgba(0,0,0,0.1);`;
+    btn.prepend(dot);
+    btn.appendChild(document.createTextNode(t.label));
+    btn.addEventListener('click', () => {
+      applyTheme(t.id);
+      renderThemeSelector();
+      // Update splash bg
+      document.getElementById('splash').style.background = t.color;
+    });
+    el.appendChild(btn);
+  });
+}
+
+// ===== Splash =====
+function initSplash() {
+  const quotes = store.quotes.length ? store.quotes : DEFAULT_QUOTES;
+  const q = quotes[Math.floor(Math.random() * quotes.length)];
+  document.getElementById('splash-text').textContent = q;
+  // Set splash bg to theme color
+  const theme = THEMES.find(t => t.id === store.theme) || THEMES[0];
+  document.getElementById('splash').style.background = theme.color;
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hide');
+    document.getElementById('app').classList.add('visible');
+  }, 3200);
+}
+
+// ===== Tabs =====
+const tabContents = {
+  record: document.getElementById('tabRecord'),
+  history: document.getElementById('tabHistory'),
+  dump: document.getElementById('tabDump'),
+};
+
+document.querySelectorAll('.tab-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    Object.entries(tabContents).forEach(([key, el]) => {
+      el.classList.toggle('active', key === btn.dataset.tab);
+    });
+    if (btn.dataset.tab === 'history') renderHistory();
+    if (btn.dataset.tab === 'dump') renderDump();
+  });
+});
+
+// ===== Record Tab =====
+function updateRecordDate() {
+  document.getElementById('recordDate').textContent = todayStr();
+}
+
+function updateRecordCount() {
+  const total = store.records.length;
+  const el = document.getElementById('recordCount');
+  if (total > 0) {
+    el.textContent = `共 ${total} 条记录`;
+  } else {
+    el.textContent = '';
+  }
+}
+
+function renderTags() {
+  const grid = document.getElementById('tagsGrid');
+  grid.innerHTML = '';
+  store.tags.forEach(tag => {
+    const chip = document.createElement('button');
+    chip.className = 'tag-chip';
+    chip.dataset.tag = tag;
+    chip.textContent = tag;
+    chip.addEventListener('click', (e) => {
+      if (e.target.closest('.tag-del')) return;
+      chip.classList.toggle('selected');
+    });
+    grid.appendChild(chip);
+  });
+  // add button
+  const addBtn = document.createElement('button');
+  addBtn.className = 'tag-chip add-btn';
+  addBtn.textContent = '+';
+  addBtn.addEventListener('click', () => {
+    document.getElementById('tagInputWrapper').classList.toggle('show');
+    document.getElementById('tagInput').focus();
+  });
+  grid.appendChild(addBtn);
+}
+
+function getSelectedTags() {
+  return [...document.querySelectorAll('#tagsGrid .tag-chip.selected')].map(el => el.dataset.tag);
+}
+
+// Save
+document.getElementById('saveBtn').addEventListener('click', () => {
+  const content = document.getElementById('recordInput').value.trim();
+  const tags = getSelectedTags();
+  if (!content && tags.length === 0) {
+    showToast('写点什么，或选个标签吧');
+    return;
+  }
+  store.records.unshift({
+    id: Date.now(),
+    date: todayStr().split(' · ')[0],
+    time: nowStr(),
+    content: content || '',
+    tags: tags,
+    dumped: false,
+  });
+  _save();
+  document.getElementById('recordInput').value = '';
+  document.querySelectorAll('#tagsGrid .tag-chip.selected').forEach(el => el.classList.remove('selected'));
+  updateRecordCount();
+  showToast('✔ 已记录');
+});
+
+// Tag input
+document.getElementById('tagConfirm').addEventListener('click', () => {
+  const input = document.getElementById('tagInput');
+  const name = input.value.trim();
+  if (!name) return;
+  if (store.tags.includes(name)) {
+    showToast('标签已存在');
+    return;
+  }
+  store.tags.push(name);
+  _save();
+  input.value = '';
+  document.getElementById('tagInputWrapper').classList.remove('show');
+  renderTags();
+  renderSettingsTags();
+});
+
+document.getElementById('tagInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('tagConfirm').click();
+});
+
+// ===== History Tab =====
+function renderHistory(filterTag) {
+  const container = document.getElementById('historyList');
+  const empty = document.getElementById('historyEmpty');
+
+  let records = [...store.records];
+  if (filterTag && filterTag !== '__all__') {
+    records = records.filter(r => r.tags.includes(filterTag));
+  }
+
+  if (records.length === 0) {
+    empty.style.display = 'block';
+    container.innerHTML = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Render filter bar
+  const filterBar = document.getElementById('historyFilter');
+  filterBar.innerHTML = '';
+  const allChip = document.createElement('button');
+  allChip.className = `filter-chip all ${!filterTag || filterTag === '__all__' ? 'active' : ''}`;
+  allChip.textContent = '全部';
+  allChip.addEventListener('click', () => renderHistory('__all__'));
+  filterBar.appendChild(allChip);
+
+  const usedTags = [...new Set(store.records.flatMap(r => r.tags))].filter(t => t && t !== '倾倒追加');
+  usedTags.forEach(tag => {
+    const chip = document.createElement('button');
+    chip.className = `filter-chip ${filterTag === tag ? 'active' : ''}`;
+    chip.textContent = tag;
+    chip.addEventListener('click', () => renderHistory(tag));
+    filterBar.appendChild(chip);
+  });
+
+  // Render records grouped by day
+  const groups = groupByDay(records);
+  let html = '';
+  groups.forEach(([day, items]) => {
+    html += `<div class="history-day">${day}</div>`;
+    items.forEach(r => {
+      const tags = r.tags.map(t => `<span class="item-tag${t === '倾倒追加' ? ' tag-followup' : ''}">${t}</span>`).join('');
+      const timeStr = r.time || '';
+      html += `<div class="history-item" data-id="${r.id}">
+        <div class="item-top">
+          <div class="item-content">${escHtml(r.content || '(无文字)')}</div>
+          <span class="item-time">${timeStr}</span>
+        </div>
+        <div class="item-bottom">
+          <div class="item-tags">${tags}</div>
+          <div class="item-actions">
+            ${r.dumped ? `<span class="item-dumped-tag">已倾倒</span><button class="history-fu-btn" data-fu-id="${r.id}">追加${store.records.filter(rec => rec.followupOf === r.id).length > 0 ? ` (${store.records.filter(rec => rec.followupOf === r.id).length})` : ''}</button>` : ''}
+            <button class="item-action-btn" data-edit-id="${r.id}">编辑</button>
+            <button class="item-action-btn danger" data-del-id="${r.id}">删除</button>
+          </div>
+        </div>
+        ${r.dumped ? `<div class="history-fu-panel" data-fu-panel="${r.id}">
+          <textarea data-fu-text="${r.id}" placeholder="追加一句…" rows="2"></textarea>
+          <div class="fu-actions">
+            <button class="fu-submit" data-fu-submit="${r.id}">提交</button>
+            <button class="fu-cancel" data-fu-cancel="${r.id}">取消</button>
+          </div>
+        </div>` : ''}
+      </div>`;
+    });
+  });
+  container.innerHTML = html;
+
+  // Expand/collapse on click + edit/delete/followup buttons
+  container.querySelectorAll('.history-item').forEach(item => {
+    const content = item.querySelector('.item-content');
+    item.addEventListener('click', (e) => {
+      if (e.target.closest('.item-action-btn') || e.target.closest('.history-fu-btn') || e.target.closest('.fu-submit') || e.target.closest('.fu-cancel')) return;
+      content.classList.toggle('expanded');
+    });
+  });
+
+  // Delete
+  container.querySelectorAll('.item-action-btn.danger').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = Number(btn.dataset.delId);
+      if (confirm('删除这条记录？')) {
+        // Find followup IDs for cascade cleanup
+        const followupIds = store.records.filter(r => r.followupOf === id).map(r => r.id);
+        const removeIds = [id, ...followupIds];
+        // Remove all these IDs from dump events
+        store.dumps.forEach(d => {
+          d.recordIds = d.recordIds.filter(rid => !removeIds.includes(rid));
+        });
+        // Cascade delete: remove original + its followup records
+        store.records = store.records.filter(r => !removeIds.includes(r.id));
+        _save();
+        renderHistory(filterTag);
+        updateRecordCount();
+        showToast('已删除');
+      }
+    });
+  });
+
+  // Edit
+  container.querySelectorAll('.item-action-btn:not(.danger)').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = Number(btn.dataset.editId);
+      const record = store.records.find(r => r.id === id);
+      if (!record) return;
+      openEditPanel(record, filterTag);
+    });
+  });
+
+  // Followup: show/hide panel
+  container.querySelectorAll('.history-fu-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.fuId;
+      const panel = document.querySelector(`[data-fu-panel="${id}"]`);
+      panel.classList.toggle('show');
+      if (panel.classList.contains('show')) {
+        panel.querySelector('textarea').focus();
+      }
+    });
+  });
+
+  // Followup: cancel
+  container.querySelectorAll('.fu-cancel').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const panel = btn.closest('.history-fu-panel');
+      panel.classList.remove('show');
+      panel.querySelector('textarea').value = '';
+    });
+  });
+
+  // Followup: submit — creates a new record with '倾倒追加' tag
+  container.querySelectorAll('.fu-submit').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = Number(btn.dataset.fuSubmit);
+      const panel = document.querySelector(`[data-fu-panel="${id}"]`);
+      const text = panel.querySelector('textarea').value.trim();
+      if (!text) { showToast('写点什么吧'); return; }
+      store.records.unshift({
+        id: Date.now(),
+        date: todayStr().split(' · ')[0],
+        time: nowStr(),
+        content: text,
+        tags: ['倾倒追加'],
+        dumped: false,
+        followupOf: id,
+      });
+      _save();
+      panel.classList.remove('show');
+      panel.querySelector('textarea').value = '';
+      renderHistory(filterTag);
+      showToast('✔ 已追加');
+    });
+  });
+}
+
+function escHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+// ===== Edit Panel =====
+let editingRecord = null;
+let editingFilterTag = null;
+
+function openEditPanel(record, filterTag) {
+  editingRecord = record;
+  editingFilterTag = filterTag;
+  document.getElementById('editTextarea').value = record.content || '';
+
+  // Render tags with selection
+  const grid = document.getElementById('editTagsGrid');
+  grid.innerHTML = '';
+  // If this is a followup record, show readonly 倾倒追加 tag
+  if (record.followupOf) {
+    const chip = document.createElement('button');
+    chip.className = 'tag-chip selected';
+    chip.style.cssText = 'opacity:0.8;cursor:default;';
+    chip.textContent = '倾倒追加';
+    grid.appendChild(chip);
+  }
+  store.tags.forEach(tag => {
+    const chip = document.createElement('button');
+    chip.className = `tag-chip ${record.tags.includes(tag) ? 'selected' : ''}`;
+    chip.dataset.tag = tag;
+    chip.textContent = tag;
+    chip.addEventListener('click', () => chip.classList.toggle('selected'));
+    grid.appendChild(chip);
+  });
+
+  document.getElementById('editOverlay').classList.add('show');
+  document.getElementById('editPanel').classList.add('show');
+}
+
+function closeEditPanel() {
+  document.getElementById('editOverlay').classList.remove('show');
+  document.getElementById('editPanel').classList.remove('show');
+  editingRecord = null;
+  editingFilterTag = null;
+}
+
+document.getElementById('editOverlay').addEventListener('click', closeEditPanel);
+document.getElementById('editCancelBtn').addEventListener('click', closeEditPanel);
+
+document.getElementById('editSaveBtn').addEventListener('click', () => {
+  if (!editingRecord) return;
+  const content = document.getElementById('editTextarea').value.trim();
+  const tags = [...document.querySelectorAll('#editTagsGrid .tag-chip.selected')].map(el => el.dataset.tag);
+  if (!content && tags.length === 0) {
+    showToast('写点什么，或选个标签吧');
+    return;
+  }
+  editingRecord.content = content || '';
+  editingRecord.tags = tags;
+  // Preserve 倾倒追加 tag if it's a followup record
+  if (editingRecord.followupOf && !editingRecord.tags.includes('倾倒追加')) {
+    editingRecord.tags.unshift('倾倒追加');
+  }
+  _save();
+  closeEditPanel();
+  renderHistory(editingFilterTag);
+  showToast('✔ 已更新');
+});
+
+// ===== Dump Tab =====
+function renderDump() {
+  const view = document.getElementById('dumpView');
+  const undumped = store.records.filter(r => !r.dumped);
+  const lastDump = store.dumps.length > 0 ? store.dumps[store.dumps.length - 1] : null;
+
+  // Calculate days since last dump (based on dump events, not individual records)
+  let daysSince = 0;
+  if (lastDump) {
+    const last = new Date(lastDump.date);
+    daysSince = Math.floor((new Date() - last) / (1000 * 60 * 60 * 24));
+  }
+
+  // Progress dots (14 day cycle)
+  const cycle = 14;
+  const progress = Math.min(daysSince, cycle);
+  const dots = [];
+  for (let i = 0; i < cycle; i++) {
+    dots.push(`<span class="dump-dot ${i < progress ? 'filled' : ''}"></span>`);
+  }
+
+  const hasNoDump = (d) => {
+    const recordsLeft = d.recordIds ? d.recordIds.filter(id => store.records.some(r => r.id === id)) : [];
+    const followups = store.records.filter(r => r.followupOf && d.recordIds && d.recordIds.includes(r.followupOf));
+    return recordsLeft.length === 0 && followups.length === 0;
+  };
+
+  // Done screen: nothing to dump at all
+  if (undumped.length === 0) {
+    let html = `<div class="dump-done">
+      <div class="done-icon">○</div>
+      <div class="done-text">最近都好好的</div>
+      <div class="done-date">上次倾倒：${lastDump ? lastDump.date : '—'}</div>
+    </div>`;
+    const visibleDumps = store.dumps.filter(d => !hasNoDump(d));
+    if (visibleDumps.length > 0) {
+      html += `<div class="dump-history">
+        <div class="dump-section-label">倾倒记录</div>`;
+      [...visibleDumps].reverse().slice(0, 20).forEach(d => {
+        html += renderDumpHistorySection(d);
+      });
+      html += `</div>`;
+    }
+    view.innerHTML = html;
+    return;
+  }
+
+  let html = `<div class="dump-header">
+    <div class="dump-days">距离上次倾倒已过去</div>
+    <div class="dump-days"><strong>${daysSince}</strong> 天</div>
+    <div class="dump-progress">${dots.join('')}</div>
+  </div>`;
+
+  html += `<div class="dump-section-label">选中有哪些想清空的记录？</div>
+    <div class="dump-record-list" id="dumpRecordList">`;
+  undumped.forEach(r => {
+    const preview = r.content ? (r.content.length > 40 ? r.content.slice(0, 40) + '…' : r.content) : '（无文字）';
+    html += `<div class="dump-record-item" data-dump-id="${r.id}">
+      <div class="dr-check">✓</div>
+      <div class="dr-body">
+        <span class="dr-date">${r.date}</span> ${escHtml(preview)}
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  html += `<button class="dump-btn" id="dumpBtn" disabled>倾倒</button>`;
+
+  // Dump history
+  const visibleDumps = store.dumps.filter(d => !hasNoDump(d));
+  if (visibleDumps.length > 0) {
+    html += `<div class="dump-history">
+      <div class="dump-section-label">倾倒记录</div>`;
+    [...visibleDumps].reverse().slice(0, 20).forEach(d => {
+      html += renderDumpHistorySection(d);
+    });
+    html += `</div>`;
+  }
+
+  view.innerHTML = html;
+
+  // Toggle selection on click
+  const list = document.getElementById('dumpRecordList');
+  if (list) {
+    list.querySelectorAll('.dump-record-item').forEach(el => {
+      el.addEventListener('click', () => {
+        el.classList.toggle('selected');
+        updateDumpBtnState();
+      });
+    });
+  }
+
+  const dumpBtn = document.getElementById('dumpBtn');
+
+  function updateDumpBtnState() {
+    dumpBtn.disabled = document.querySelectorAll('#dumpRecordList .dump-record-item.selected').length === 0;
+  }
+
+  dumpBtn.addEventListener('click', () => {
+    const selectedIds = [];
+    if (list) {
+      list.querySelectorAll('.dump-record-item.selected').forEach(el => {
+        selectedIds.push(Number(el.dataset.dumpId));
+      });
+    }
+
+    // Mark selected records as dumped
+    store.records.forEach(r => {
+      if (selectedIds.includes(r.id)) r.dumped = true;
+    });
+
+    const dumpId = Date.now();
+    store.dumps.push({
+      id: dumpId,
+      date: todayStr().split(' · ')[0],
+      note: '',
+      recordIds: selectedIds,
+      followups: [],
+    });
+    _save();
+    renderDump();
+    showToast(`🗑 已清空 ${selectedIds.length} 条`);
+  });
+}
+
+/* ── Render a single dump event as a history section ── */
+function renderDumpHistorySection(d) {
+  // Migrate old data: if 'content' exists but no 'note', copy it over
+  if (d.content && !d.note) d.note = d.content;
+  if (!d.followups) d.followups = [];
+
+  const existingRecords = d.recordIds ? d.recordIds.map(id => store.records.find(r => r.id === id)).filter(Boolean) : [];
+  const count = existingRecords.length;
+  let html = `<div class="dump-history-item">
+    <div class="dh-date">${d.date}${count ? ` · ${count} 条` : ''}</div>`;
+
+  // Records section (which records were dumped)
+  if (count > 0) {
+    html += `<div class="dh-section">
+      <div class="dh-section-label">📋 放下了 ${count} 条</div>`;
+    existingRecords.forEach(rec => {
+      if (rec) {
+        const preview = rec.content ? (rec.content.length > 40 ? rec.content.slice(0, 40) + '…' : rec.content) : '（无文字）';
+        html += `<div class="dh-record">${escHtml(preview)}</div>`;
+      }
+    });
+    html += `</div>`;
+  }
+
+  // Note section (放下的话)
+  if (d.note) {
+    html += `<div class="dh-section">
+      <div class="dh-section-label">📝 放下的话</div>
+      <div class="dh-content">${escHtml(d.note)}</div>
+    </div>`;
+  }
+
+  // Followups section — look up records tagged as 倾倒追加
+  const followupRecords = store.records.filter(r => r.followupOf && d.recordIds.includes(r.followupOf));
+  if (followupRecords.length > 0) {
+    html += `<div class="dh-section">
+      <div class="dh-section-label">💬 追加（${followupRecords.length}条）</div>`;
+    followupRecords.forEach(fu => {
+      html += `<div class="dh-followup"><span class="dh-fu-time">${fu.time || ''}</span> ${escHtml(fu.content)}</div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+// ===== Settings =====
+const settingsBtn = document.getElementById('settingsBtn');
+const overlay = document.getElementById('overlay');
+const panel = document.getElementById('settingsPanel');
+
+function openSettings() {
+  overlay.classList.add('show');
+  panel.classList.add('show');
+  renderSettingsQuotes();
+  renderSettingsTags();
+  renderThemeSelector();
+}
+
+function closeSettings() {
+  overlay.classList.remove('show');
+  panel.classList.remove('show');
+}
+
+settingsBtn.addEventListener('click', openSettings);
+overlay.addEventListener('click', closeSettings);
+
+// ===== Quotes Collapse =====
+let quotesOpen = true;
+
+function renderSettingsQuotes() {
+  const list = document.getElementById('quoteList');
+  const count = document.getElementById('quoteCount');
+  list.innerHTML = '';
+  count.textContent = store.quotes.length;
+  store.quotes.forEach((q, i) => {
+    const div = document.createElement('div');
+    div.className = 'settings-quote-item';
+    div.innerHTML = `<span class="q-text">${q}</span>
+      <button class="q-del" data-idx="${i}">✕</button>`;
+    div.querySelector('.q-del').addEventListener('click', () => {
+      store.quotes.splice(i, 1);
+      _save();
+      renderSettingsQuotes();
+    });
+    list.appendChild(div);
+  });
+}
+
+document.getElementById('quoteCollapseHeader').addEventListener('click', () => {
+  quotesOpen = !quotesOpen;
+  document.getElementById('quoteCollapseBody').classList.toggle('open', quotesOpen);
+  document.getElementById('quoteArrow').classList.toggle('open', quotesOpen);
+});
+
+// Start with quotes collapsed if more than 5
+if (store.quotes.length > 5) {
+  quotesOpen = false;
+} else {
+  quotesOpen = true;
+  document.getElementById('quoteCollapseBody').classList.add('open');
+  document.getElementById('quoteArrow').classList.add('open');
+}
+
+document.getElementById('quoteAddBtn').addEventListener('click', () => {
+  const input = document.getElementById('quoteInput');
+  const q = input.value.trim();
+  if (!q) return;
+  store.quotes.push(q);
+  _save();
+  input.value = '';
+  renderSettingsQuotes();
+});
+
+document.getElementById('quoteInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('quoteAddBtn').click();
+});
+
+function renderSettingsTags() {
+  const wrap = document.getElementById('settingsTagsWrap');
+  wrap.innerHTML = '';
+  store.tags.forEach(tag => {
+    const span = document.createElement('span');
+    span.className = 'settings-tag-item';
+    span.innerHTML = `${tag} <button class="st-del" data-tag="${tag}">✕</button>`;
+    span.querySelector('.st-del').addEventListener('click', () => {
+      store.tags = store.tags.filter(t => t !== tag);
+      _save();
+      renderSettingsTags();
+      renderTags();
+    });
+    wrap.appendChild(span);
+  });
+}
+
+document.getElementById('settingsTagAddBtn').addEventListener('click', () => {
+  const input = document.getElementById('settingsTagInput');
+  const name = input.value.trim();
+  if (!name) return;
+  if (store.tags.includes(name)) { showToast('标签已存在'); return; }
+  store.tags.push(name);
+  _save();
+  input.value = '';
+  renderSettingsTags();
+  renderTags();
+});
+
+document.getElementById('settingsTagInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('settingsTagAddBtn').click();
+});
+
+// ===== Export / Import =====
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const data = JSON.stringify({
+    records: store.records,
+    tags: store.tags,
+    quotes: store.quotes,
+    dumps: store.dumps,
+    theme: store.theme,
+  }, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const d = new Date();
+  a.download = `reset-backup-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✔ 已导出');
+});
+
+document.getElementById('importBtn').addEventListener('click', () => {
+  document.getElementById('importFileInput').click();
+});
+
+document.getElementById('importFileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.records || !data.tags || !data.quotes || !data.dumps) {
+        showToast('文件格式不正确');
+        return;
+      }
+      if (!confirm(`导入 ${data.records.length} 条记录、${data.tags.length} 个标签？\n当前数据将被覆盖。`)) return;
+      applyTheme(data.theme || 'default');
+      store.records = data.records;
+      store.tags = data.tags;
+      store.quotes = data.quotes;
+      store.dumps = data.dumps;
+      _save();
+      closeSettings();
+      renderTags();
+      renderDump();
+      updateRecordCount();
+      document.getElementById('historyList').innerHTML = '';
+      document.getElementById('historyEmpty').style.display = 'block';
+      showToast('✔ 已导入');
+    } catch (err) {
+      showToast('文件解析失败');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+document.getElementById('clearDataBtn').addEventListener('click', () => {
+  if (!confirm('确定清空所有数据？此操作不可恢复。')) return;
+  if (!confirm('真的要清空吗？')) return;
+  applyTheme('default');
+  store.records = [];
+  store.tags = [...DEFAULT_TAGS];
+  store.quotes = [...DEFAULT_QUOTES];
+  store.dumps = [];
+  store.theme = 'default';
+  _save();
+  closeSettings();
+  renderTags();
+  renderDump();
+  updateRecordCount();
+  document.getElementById('historyList').innerHTML = '';
+  document.getElementById('historyEmpty').style.display = 'block';
+  showToast('已清空所有数据');
+});
+
+// ===== Init =====
+applyTheme(store.theme);
+updateRecordDate();
+renderTags();
+updateRecordCount();
+initSplash();
+</script>
+</body>
+</html>
