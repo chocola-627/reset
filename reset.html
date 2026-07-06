@@ -182,6 +182,32 @@ body {
   transition: background 0.2s;
 }
 .header-btn:active { background: var(--accent-light); }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.mode-toggle {
+  display: flex;
+  background: var(--tag-bg);
+  border-radius: 20px;
+  padding: 2px;
+  gap: 0;
+}
+.mode-option {
+  border: none;
+  background: transparent;
+  padding: 4px 10px;
+  border-radius: 18px;
+  font-size: 12px;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  line-height: 1.4;
+}
+.mode-option.active {
+  background: var(--card);
+  color: var(--text);
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
 
 /* Content */
 .content {
@@ -512,6 +538,12 @@ body {
 
 /* ===== Tab: 倾倒 ===== */
 .dump-header { text-align: center; padding: 24px 0 16px; }
+.dump-tagline {
+  font-size: 14px; color: var(--text-dim);
+  margin-bottom: 10px;
+  font-style: italic;
+  letter-spacing: 1px;
+}
 .dump-days {
   font-size: 13px; color: var(--text-light);
   margin-bottom: 4px;
@@ -861,8 +893,14 @@ body {
 <!-- App -->
 <div id="app">
   <div class="header">
-    <div class="header-title">Reset <span>v2.0</span></div>
-    <button class="header-btn" id="settingsBtn" aria-label="设置">⚙</button>
+    <div class="header-title">Reset <span id="modeSubtitle">情绪记录</span></div>
+    <div class="header-right">
+      <div class="mode-toggle" id="modeToggle">
+        <button class="mode-option active" data-mode="emotion">情绪</button>
+        <button class="mode-option" data-mode="observation">观察</button>
+      </div>
+      <button class="header-btn" id="settingsBtn" aria-label="设置">⚙</button>
+    </div>
   </div>
 
   <div class="content" id="contentArea">
@@ -982,6 +1020,7 @@ body {
 <script>
 // ===== Default Data =====
 const DEFAULT_TAGS = ['愤怒', '焦虑', '悲伤', '释然', '烦躁', '平静', '无力', '委屈', '开心', '害怕', '温暖', '感动'];
+const OBSERVE_DEFAULT_TAGS = ['讨好型', '不敢表达', '自卑', '逃避', '模式复现', '自我觉察', '改变尝试'];
 const DEFAULT_QUOTES = [
   '缓一缓，再继续',
   '每一次清空，都是一次重启',
@@ -1005,10 +1044,14 @@ function loadData() {
 
 function saveData() {
   const data = {
-    records: store.records,
-    tags: store.tags,
+    mode: store.mode,
+    emotionRecords: store.emotionRecords,
+    emotionTags: store.emotionTags,
+    emotionDumps: store.emotionDumps,
+    observationRecords: store.observationRecords,
+    observationTags: store.observationTags,
+    observationDumps: store.observationDumps,
     quotes: store.quotes,
-    dumps: store.dumps,
     theme: store.theme,
   };
   localStorage.setItem('reset_data', JSON.stringify(data));
@@ -1016,11 +1059,17 @@ function saveData() {
 
 const store = (() => {
   const saved = loadData();
+  // Migration: old format (records/tags/dumps) → emotionRecords/emotionTags/emotionDumps
+  const hasOldFormat = saved?.records && !saved?.emotionRecords;
   return {
-    records: saved?.records ?? [],
-    tags: saved?.tags ?? [...DEFAULT_TAGS],
+    mode: saved?.mode ?? 'emotion',
+    emotionRecords: saved?.emotionRecords ?? (hasOldFormat ? saved.records : []),
+    emotionTags: saved?.emotionTags ?? (hasOldFormat ? saved.tags : [...DEFAULT_TAGS]),
+    emotionDumps: saved?.emotionDumps ?? (hasOldFormat ? saved.dumps : []),
+    observationRecords: saved?.observationRecords ?? [],
+    observationTags: saved?.observationTags ?? [...OBSERVE_DEFAULT_TAGS],
+    observationDumps: saved?.observationDumps ?? [],
     quotes: saved?.quotes ?? [...DEFAULT_QUOTES],
-    dumps: saved?.dumps ?? [],
     theme: saved?.theme ?? 'default',
   };
 })();
@@ -1034,7 +1083,33 @@ const THEMES = [
   { id: 'lavender', label: '淡紫', color: '#9A8ABF' },
 ];
 
+// ===== Mode Helpers =====
+function currentRecords() { return store[store.mode + 'Records']; }
+function currentTags() { return store[store.mode + 'Tags']; }
+function currentDumps() { return store[store.mode + 'Dumps']; }
+function otherMode() { return store.mode === 'emotion' ? 'observation' : 'emotion'; }
+
 const _save = saveData;
+
+// ===== Mode switch =====
+function switchMode(mode) {
+  if (store.mode === mode) return;
+  store.mode = mode;
+  _save();
+  // Reset filter state (tags are mode-specific)
+  currentFilterTag = '__all__';
+  currentFilterDate = '';
+  // Update UI
+  document.querySelectorAll('.mode-option').forEach(el => el.classList.toggle('active', el.dataset.mode === mode));
+  document.getElementById('modeSubtitle').textContent = mode === 'emotion' ? '情绪记录' : '自我观察';
+  document.getElementById('recordInput').placeholder = mode === 'emotion' ? '那一刻…' : '今天观察到了什么被忽略的瞬间？';
+  renderDateLabel();
+  // Re-render mode-dependent views
+  renderTags();
+  updateRecordCount();
+  renderHistory();
+  renderDump();
+}
 
 // ===== Filter State =====
 let currentFilterTag = '__all__';
@@ -1066,7 +1141,7 @@ function renderCalendarGrid() {
   const container = document.getElementById('calendarDropdown');
   if (!container || !calOpen) { container.innerHTML = ''; return; }
   const recordedDays = new Set();
-  store.records.forEach(r => recordedDays.add(r.date));
+  currentRecords().forEach(r => recordedDays.add(r.date));
   const firstDay = new Date(calYear, calMonth, 1);
   const lastDay = new Date(calYear, calMonth + 1, 0);
   const startDayOfWeek = firstDay.getDay();
@@ -1298,13 +1373,18 @@ document.querySelectorAll('.tab-item').forEach(btn => {
   });
 });
 
+// ===== Mode Toggle =====
+document.querySelectorAll('.mode-option').forEach(btn => {
+  btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+});
+
 // ===== Record Tab =====
 function updateRecordDate() {
   document.getElementById('recordDate').textContent = todayStr();
 }
 
 function updateRecordCount() {
-  const total = store.records.length;
+  const total = currentRecords().length;
   const el = document.getElementById('recordCount');
   if (total > 0) {
     el.textContent = `共 ${total} 条记录`;
@@ -1316,7 +1396,7 @@ function updateRecordCount() {
 function renderTags() {
   const grid = document.getElementById('tagsGrid');
   grid.innerHTML = '';
-  store.tags.forEach(tag => {
+  currentTags().forEach(tag => {
     const chip = document.createElement('button');
     chip.className = 'tag-chip';
     chip.dataset.tag = tag;
@@ -1350,7 +1430,7 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     showToast('写点什么，或选个标签吧');
     return;
   }
-  store.records.unshift({
+  currentRecords().unshift({
     id: Date.now(),
     date: todayStr().split(' · ')[0],
     time: nowStr(),
@@ -1370,11 +1450,11 @@ document.getElementById('tagConfirm').addEventListener('click', () => {
   const input = document.getElementById('tagInput');
   const name = input.value.trim();
   if (!name) return;
-  if (store.tags.includes(name)) {
+  if (currentTags().includes(name)) {
     showToast('标签已存在');
     return;
   }
-  store.tags.push(name);
+  currentTags().push(name);
   _save();
   input.value = '';
   document.getElementById('tagInputWrapper').classList.remove('show');
@@ -1394,7 +1474,7 @@ function renderHistory() {
   const container = document.getElementById('historyList');
   const empty = document.getElementById('historyEmpty');
 
-  let records = [...store.records];
+  let records = [...currentRecords()];
   if (currentFilterDate) {
     records = records.filter(r => r.date === currentFilterDate);
   }
@@ -1446,7 +1526,7 @@ function renderHistory() {
         <div class="item-bottom">
           <div class="item-tags">${tags}</div>
           <div class="item-actions">
-            ${r.dumped ? `<span class="item-dumped-tag">已倾倒</span><button class="history-fu-btn" data-fu-id="${r.id}">追加${store.records.filter(rec => rec.followupOf === r.id).length > 0 ? ` (${store.records.filter(rec => rec.followupOf === r.id).length})` : ''}</button>` : ''}
+            ${r.dumped ? `<span class="item-dumped-tag">已倾倒</span><button class="history-fu-btn" data-fu-id="${r.id}">追加${currentRecords().filter(rec => rec.followupOf === r.id).length > 0 ? ` (${currentRecords().filter(rec => rec.followupOf === r.id).length})` : ''}</button>` : ''}
             <button class="item-action-btn" data-edit-id="${r.id}">编辑</button>
             <button class="item-action-btn danger" data-del-id="${r.id}">删除</button>
           </div>
@@ -1478,10 +1558,10 @@ function renderHistory() {
       e.stopPropagation();
       const id = Number(btn.dataset.delId);
       if (confirm('删除这条记录？')) {
-        const followupIds = store.records.filter(r => r.followupOf === id).map(r => r.id);
+        const followupIds = currentRecords().filter(r => r.followupOf === id).map(r => r.id);
         const removeIds = [id, ...followupIds];
-        store.dumps.forEach(d => { d.recordIds = d.recordIds.filter(rid => !removeIds.includes(rid)); });
-        store.records = store.records.filter(r => !removeIds.includes(r.id));
+        currentDumps().forEach(d => { d.recordIds = d.recordIds.filter(rid => !removeIds.includes(rid)); });
+        store[store.mode + 'Records'] = currentRecords().filter(r => !removeIds.includes(r.id));
         _save();
         renderHistory();
         updateRecordCount();
@@ -1495,7 +1575,7 @@ function renderHistory() {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const id = Number(btn.dataset.editId);
-      const record = store.records.find(r => r.id === id);
+      const record = currentRecords().find(r => r.id === id);
       if (!record) return;
       openEditPanel(record);
     });
@@ -1530,7 +1610,7 @@ function renderHistory() {
       const panel = document.querySelector(`[data-fu-panel="${id}"]`);
       const text = panel.querySelector('textarea').value.trim();
       if (!text) { showToast('写点什么吧'); return; }
-      store.records.unshift({
+      currentRecords().unshift({
         id: Date.now(),
         date: todayStr().split(' · ')[0],
         time: nowStr(),
@@ -1573,7 +1653,7 @@ function openEditPanel(record) {
     chip.dataset.tag = '倾倒追加';
     grid.appendChild(chip);
   }
-  store.tags.forEach(tag => {
+  currentTags().forEach(tag => {
     const chip = document.createElement('button');
     chip.className = `tag-chip ${record.tags.includes(tag) ? 'selected' : ''}`;
     chip.dataset.tag = tag;
@@ -1618,8 +1698,8 @@ document.getElementById('editSaveBtn').addEventListener('click', () => {
 // ===== Dump Tab =====
 function renderDump() {
   const view = document.getElementById('dumpView');
-  const undumped = store.records.filter(r => !r.dumped);
-  const lastDump = store.dumps.length > 0 ? store.dumps[store.dumps.length - 1] : null;
+  const undumped = currentRecords().filter(r => !r.dumped);
+  const lastDump = currentDumps().length > 0 ? currentDumps()[currentDumps().length - 1] : null;
 
   // Calculate days since last dump (based on dump events, not individual records)
   let daysSince = 0;
@@ -1637,8 +1717,8 @@ function renderDump() {
   }
 
   const hasNoDump = (d) => {
-    const recordsLeft = d.recordIds ? d.recordIds.filter(id => store.records.some(r => r.id === id)) : [];
-    const followups = store.records.filter(r => r.followupOf && d.recordIds && d.recordIds.includes(r.followupOf));
+    const recordsLeft = d.recordIds ? d.recordIds.filter(id => currentRecords().some(r => r.id === id)) : [];
+    const followups = currentRecords().filter(r => r.followupOf && d.recordIds && d.recordIds.includes(r.followupOf));
     return recordsLeft.length === 0 && followups.length === 0;
   };
 
@@ -1646,10 +1726,10 @@ function renderDump() {
   if (undumped.length === 0) {
     let html = `<div class="dump-done">
       <div class="done-icon">○</div>
-      <div class="done-text">最近都好好的</div>
+      <div class="done-text">厘清脉络，然后轻装前行</div>
       <div class="done-date">上次倾倒：${lastDump ? lastDump.date : '—'}</div>
     </div>`;
-    const visibleDumps = store.dumps.filter(d => !hasNoDump(d));
+    const visibleDumps = currentDumps().filter(d => !hasNoDump(d));
     if (visibleDumps.length > 0) {
       html += `<div class="dump-history">
         <div class="dump-section-label">倾倒记录</div>`;
@@ -1663,6 +1743,7 @@ function renderDump() {
   }
 
   let html = `<div class="dump-header">
+    <div class="dump-tagline">厘清脉络，然后轻装前行</div>
     <div class="dump-days">距离上次倾倒已过去</div>
     <div class="dump-days"><strong>${daysSince}</strong> 天</div>
     <div class="dump-progress">${dots.join('')}</div>
@@ -1684,7 +1765,7 @@ function renderDump() {
   html += `<button class="dump-btn" id="dumpBtn" disabled>倾倒</button>`;
 
   // Dump history
-  const visibleDumps = store.dumps.filter(d => !hasNoDump(d));
+  const visibleDumps = currentDumps().filter(d => !hasNoDump(d));
   if (visibleDumps.length > 0) {
     html += `<div class="dump-history">
       <div class="dump-section-label">倾倒记录</div>`;
@@ -1722,12 +1803,12 @@ function renderDump() {
     }
 
     // Mark selected records as dumped
-    store.records.forEach(r => {
+    currentRecords().forEach(r => {
       if (selectedIds.includes(r.id)) r.dumped = true;
     });
 
     const dumpId = Date.now();
-    store.dumps.push({
+    currentDumps().push({
       id: dumpId,
       date: todayStr().split(' · ')[0],
       note: '',
@@ -1746,7 +1827,7 @@ function renderDumpHistorySection(d) {
   if (d.content && !d.note) d.note = d.content;
   if (!d.followups) d.followups = [];
 
-  const existingRecords = d.recordIds ? d.recordIds.map(id => store.records.find(r => r.id === id)).filter(Boolean) : [];
+  const existingRecords = d.recordIds ? d.recordIds.map(id => currentRecords().find(r => r.id === id)).filter(Boolean) : [];
   const count = existingRecords.length;
   let html = `<div class="dump-history-item">
     <div class="dh-date">${d.date}${count ? ` · ${count} 条` : ''}</div>`;
@@ -1773,7 +1854,7 @@ function renderDumpHistorySection(d) {
   }
 
   // Followups section — look up records tagged as 倾倒追加
-  const followupRecords = store.records.filter(r => r.followupOf && d.recordIds.includes(r.followupOf));
+  const followupRecords = currentRecords().filter(r => r.followupOf && d.recordIds.includes(r.followupOf));
   if (followupRecords.length > 0) {
     html += `<div class="dh-section">
       <div class="dh-section-label">💬 追加（${followupRecords.length}条）</div>`;
@@ -1864,7 +1945,7 @@ let dragTagSrc = null;
 function renderSettingsTags() {
   const wrap = document.getElementById('settingsTagsWrap');
   wrap.innerHTML = '';
-  store.tags.forEach(tag => {
+  currentTags().forEach(tag => {
     const span = document.createElement('span');
     span.className = 'settings-tag-item';
     span.draggable = true;
@@ -1883,7 +1964,7 @@ function renderSettingsTags() {
     span.addEventListener('drop', (e) => {
       e.preventDefault();
       if (!dragTagSrc || dragTagSrc === tag) return;
-      const tags = store.tags;
+      const tags = currentTags();
       const fromIdx = tags.indexOf(dragTagSrc);
       const toIdx = tags.indexOf(tag);
       if (fromIdx === -1 || toIdx === -1) return;
@@ -1896,7 +1977,7 @@ function renderSettingsTags() {
 
     span.querySelector('.st-del').addEventListener('click', (e) => {
       e.stopPropagation();
-      store.tags = store.tags.filter(t => t !== tag);
+      store[store.mode + 'Tags'] = currentTags().filter(t => t !== tag);
       _save();
       renderSettingsTags();
       renderTags();
@@ -1909,8 +1990,8 @@ document.getElementById('settingsTagAddBtn').addEventListener('click', () => {
   const input = document.getElementById('settingsTagInput');
   const name = input.value.trim();
   if (!name) return;
-  if (store.tags.includes(name)) { showToast('标签已存在'); return; }
-  store.tags.push(name);
+  if (currentTags().includes(name)) { showToast('标签已存在'); return; }
+  currentTags().push(name);
   _save();
   input.value = '';
   renderSettingsTags();
@@ -1924,10 +2005,14 @@ document.getElementById('settingsTagInput').addEventListener('keydown', (e) => {
 // ===== Export / Import =====
 document.getElementById('exportBtn').addEventListener('click', () => {
   const data = JSON.stringify({
-    records: store.records,
-    tags: store.tags,
+    mode: store.mode,
+    emotionRecords: store.emotionRecords,
+    emotionTags: store.emotionTags,
+    emotionDumps: store.emotionDumps,
+    observationRecords: store.observationRecords,
+    observationTags: store.observationTags,
+    observationDumps: store.observationDumps,
     quotes: store.quotes,
-    dumps: store.dumps,
     theme: store.theme,
   }, null, 2);
   const blob = new Blob([data], { type: 'application/json' });
@@ -1952,17 +2037,29 @@ document.getElementById('importFileInput').addEventListener('change', (e) => {
   reader.onload = (ev) => {
     try {
       const data = JSON.parse(ev.target.result);
-      if (!data.records || !data.tags || !data.quotes || !data.dumps) {
+      // Migration: old format (records/tags/dumps) → new format
+      if (data.records && !data.emotionRecords) {
+        data.emotionRecords = data.records;
+        data.emotionTags = data.tags;
+        data.emotionDumps = data.dumps;
+      }
+      if (!data.emotionRecords) {
         showToast('文件格式不正确');
         return;
       }
-      if (!confirm(`导入 ${data.records.length} 条记录、${data.tags.length} 个标签？\n当前数据将被覆盖。`)) return;
+      if (!confirm('导入数据？当前数据将被覆盖。')) return;
       applyTheme(data.theme || 'default');
-      store.records = data.records;
-      store.tags = data.tags;
-      store.quotes = data.quotes;
-      store.dumps = data.dumps;
+      const importMode = data.mode || 'emotion';
+      store.emotionRecords = data.emotionRecords || [];
+      store.emotionTags = data.emotionTags || [...DEFAULT_TAGS];
+      store.emotionDumps = data.emotionDumps || [];
+      store.observationRecords = data.observationRecords || [];
+      store.observationTags = data.observationTags || [...OBSERVE_DEFAULT_TAGS];
+      store.observationDumps = data.observationDumps || [];
+      store.quotes = data.quotes || [...DEFAULT_QUOTES];
+      store.theme = data.theme || 'default';
       _save();
+      switchMode(importMode);
       closeSettings();
       renderTags();
       renderDump();
@@ -1982,12 +2079,16 @@ document.getElementById('clearDataBtn').addEventListener('click', () => {
   if (!confirm('确定清空所有数据？此操作不可恢复。')) return;
   if (!confirm('真的要清空吗？')) return;
   applyTheme('default');
-  store.records = [];
-  store.tags = [...DEFAULT_TAGS];
+  store.emotionRecords = [];
+  store.emotionTags = [...DEFAULT_TAGS];
+  store.emotionDumps = [];
+  store.observationRecords = [];
+  store.observationTags = [...OBSERVE_DEFAULT_TAGS];
+  store.observationDumps = [];
   store.quotes = [...DEFAULT_QUOTES];
-  store.dumps = [];
   store.theme = 'default';
   _save();
+  switchMode('emotion');
   closeSettings();
   renderTags();
   renderDump();
@@ -2004,6 +2105,14 @@ renderTags();
 updateRecordCount();
 renderDateLabel();
 initSplash();
+// Sync mode toggle state
+const initMode = store.mode;
+if (initMode === 'observation') {
+  document.querySelector('.mode-option[data-mode="observation"]').classList.add('active');
+  document.querySelector('.mode-option[data-mode="emotion"]').classList.remove('active');
+  document.getElementById('modeSubtitle').textContent = '自我观察';
+  document.getElementById('recordInput').placeholder = '今天观察到了什么被忽略的瞬间？';
+}
 </script>
 </body>
 </html>
